@@ -1,7 +1,11 @@
-﻿namespace MineSweeper.Models
+﻿using Xamarin.Forms;
+
+namespace MineSweeper.Models
 {
     public interface IMSNotification
     {
-        void GameOver(Cell cell);
+        void NotifyGameOver(Cell cell);
+
+        Grid RequestArea();
     }
 }

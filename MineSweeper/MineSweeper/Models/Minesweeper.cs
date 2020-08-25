@@ -1,23 +1,49 @@
 ﻿using System;
-using System.Collections.Generic;
 using Xamarin.Forms;
+using MineSweeper.Models.LongPress;
 
 namespace MineSweeper.Models
 {
+    /// <summary>
+    /// Main object for the MineSweeper that contains mostly all functionality for the game
+    /// </summary>
     public class Minesweeper
     {
         #region Properties
+        /// <summary>
+        /// Contains all the cells
+        /// </summary>
         public Cell[,] Cells { get; private set; }
-        public ISettings Settings { get; set; }
+
+        /// <summary>
+        /// Use this to change the settings of the game
+        /// </summary>
+        public IMSSettings Settings { get; set; }
+
         public bool IsGameOver { get; private set; }
+
+        /// <summary>
+        /// Contains methods from the class who initialize this object
+        /// </summary>
+        private IMSNotification Notification { get; set; }
         #endregion
+
+
+
         #region Constructor
-        public Minesweeper(ISettings settings)
+        public Minesweeper(IMSSettings settings, IMSNotification notification)
         {
             Settings = settings;
+            Notification = notification;
         }
         #endregion
+
+
+
         #region Methods
+        /// <summary>
+        /// Defines a rows and columns in the <see cref="Grid"/> area
+        /// </summary>
         public void CreateArea(Grid _area)
         {
             _area.BackgroundColor = Settings.AreaBackground;
@@ -33,6 +59,11 @@ namespace MineSweeper.Models
             }
         }
         
+
+        /// <summary>
+        /// Creates <see cref="Cell"/> objects that are empty cells or mines. 
+        /// The number of cells and mines depends in the <see cref="Settings"/> property
+        /// </summary>
         public void CreateCells()
         {
             Cells = new Cell[Settings.Columns, Settings.Rows];
@@ -63,7 +94,12 @@ namespace MineSweeper.Models
             }
         }
 
-        public void DisplayCells(Grid _area, IMSNotification notification)
+
+        /// <summary>
+        /// Creates visual objects (<see cref="ImageButton"/>) that represents Cells and adds in the grid area.
+        /// The visual representation of the <see cref="Cell"/> depends of the <see cref="Settings"/> property
+        /// </summary>
+        public void DisplayCells(Grid _area)
         {
             for (int x = 0; x < Settings.Columns; x++)
             {
@@ -71,12 +107,17 @@ namespace MineSweeper.Models
                 {
                     Cells[x, y].ScanNearbyCells(Cells);
 
-                    _area.Children.Add(CreateCell(x, y, notification, _area, Cells[x, y].IsMine));
+                    _area.Children.Add(CreateCell(x, y));
                 }
             }
         }
 
-        public void Restart(Grid _area, IMSNotification notification)
+
+        /// <summary>
+        /// Creates cell objects (calls <see cref="CreateCells"/>) and refresh already defined visual Cells (<see cref="ImageButton"/>) 
+        /// in the grid area
+        /// </summary>
+        public void Restart(Grid _area)
         {
             CreateCells();
 
@@ -86,114 +127,98 @@ namespace MineSweeper.Models
                 {
                     Cells[x, y].ScanNearbyCells(Cells);
 
-                    ReCreateCell((_area.Children[x * Settings.Rows + y] as Grid), x, y, notification, _area);
+                    ImageButton temp = (_area.Children[x * Settings.Rows + y] as ImageButton);
+
+                    temp.BackgroundColor = Settings.CellForeground;
+                    temp.Source = null;
                 }
             }
         }
 
-        private Grid CreateCell(int x, int y, IMSNotification notification, Grid area, bool isMine)
-        {
-            Grid cell = new Grid { BackgroundColor = Settings.CellBackground };
 
-            if (isMine)
-            {
-                cell.Children.Add(new Image
-                {
-                    Source = "mine"
-                });
-            }
-            else
-            {
-                cell.Children.Add(new Label()
-                {
-                    Text = Cells[x, y].MinesNerby == 0 ? "" : Cells[x, y].MinesNerby.ToString(),
-                    HorizontalTextAlignment = TextAlignment.Center,
-                    VerticalTextAlignment = TextAlignment.Center,
-                    TextColor = Settings.CellTextColor
-                });
-            }
-            
-            cell.Children.Add(new BoxView()
-            {
-                BackgroundColor = Settings.CellForeground,
-                Margin = new Thickness(0.5),
-            });
+        /// <summary>
+        /// Create single <see cref="Cell"/> in the given position.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        private ImageButton CreateCell(int x, int y)
+        {
+            ImageButton cell = new ImageButton { BackgroundColor = Settings.CellForeground };
 
             Grid.SetRow(cell, y);
             Grid.SetColumn(cell, x);
 
-            AddTapGesture(cell, notification, area);
+            LongPressBehavior longPress = new LongPressBehavior(x, y, 500);
+
+            longPress.LongPressed += AddLongPressGesture;
+
+            cell.Behaviors.Add(longPress);
+            cell.Clicked += AddTapGesture;
 
             return cell;
         }
 
-        private void AddTapGesture(Grid grid, IMSNotification notification, Grid area)
+
+        /// <summary>
+        /// Tap event for visual cell (<see cref="ImageButton"/>)
+        /// </summary>
+        private void AddTapGesture(object sender, EventArgs e)
         {
-            var tapGesture = new TapGestureRecognizer();
+            ImageButton cell = sender as ImageButton;
 
-            tapGesture.Tapped += (s, e) => {
-                var cell = s as Grid;
+            int x = Grid.GetColumn(cell);
+            int y = Grid.GetRow(cell);
 
-                cell.Children[cell.Children.Count-1].Opacity = 0;
+            if (!Cells[x, y].Show(Cells))
+            {
+                cell.BackgroundColor = Settings.CellBackground;
+                cell.Source = "mine";
 
-                int x = Grid.GetColumn(cell);
-                int y = Grid.GetRow(cell);
-
-                if (!Cells[x, y].Show(Cells))
+                Notification.NotifyGameOver(Cells[x, y]);
+                Console.WriteLine("Game Over");
+            }
+            else
+            {
+                for (int i = 0; i < Cells.GetLength(0); i++)
                 {
-                    notification.GameOver(Cells[x,y]);
-                }
-                else
-                {
-                    for (int i = 0; i < Cells.GetLength(0); i++)
+                    for (int j = 0; j < Cells.GetLength(1); j++)
                     {
-                        for (int j = 0; j < Cells.GetLength(1); j++)
+                        if (Cells[i, j].Visibility)
                         {
-                            if (Cells[i, j].Visibility)
+                            var temp = (cell.Parent as Grid).Children[i * Settings.Rows + j] as ImageButton;
+                            temp.BackgroundColor = Settings.CellBackground;
+
+                            if (Cells[i, j].IsMine)
                             {
-                                var temp = area.Children[i * Settings.Rows + j] as Grid;
-                                temp.Children[temp.Children.Count - 1].Opacity = 0;
+                                temp.Source = "mine";
+                            }
+                            else
+                            {
+                                if (Cells[i, j].MinesNerby > 0) temp.Source = "number_" + Cells[i, j].MinesNerby;
                             }
                         }
                     }
                 }
-            };
-
-            grid.GestureRecognizers.Clear();
-
-            grid.GestureRecognizers.Add(tapGesture);
+            }
         }
 
-        private void ReCreateCell(Grid cell, int x, int y, IMSNotification notification, Grid area)
+
+        /// <summary>
+        /// Long press event for visual cell (<see cref="ImageButton"/>)
+        /// </summary>
+        private void AddLongPressGesture (object sender, EventArgs e)
         {
-            if (Cells[x, y].IsMine)
-            {
-                cell.Children[0] = new Image
-                {
-                    Source = "mine"
-                };
-            }
-            else
-            {
-                cell.Children[0] = new Label
-                {
-                    Text = Cells[x, y].MinesNerby == 0 ? "" : Cells[x, y].MinesNerby.ToString(),
-                    HorizontalTextAlignment = TextAlignment.Center,
-                    VerticalTextAlignment = TextAlignment.Center,
-                    TextColor = Settings.CellTextColor
-                };
-            }
+            var temp = (sender as LongPressBehavior);
 
-            cell.Children[1] = new BoxView
-            {
-                BackgroundColor = Settings.CellForeground,
-                Margin = new Thickness(0.5),
-            };
+            int x = temp.X;
+            int y = temp.Y;
 
-            Grid.SetRow(cell, y);
-            Grid.SetColumn(cell, x);
+            ImageButton cell = Notification.RequestArea().Children[x * Settings.Rows + y] as ImageButton;
 
-            AddTapGesture(cell, notification, area);
+            cell.Source = "flag";
+
+            Cells[x, y].IsFlaged = true;
         }
         #endregion
     }

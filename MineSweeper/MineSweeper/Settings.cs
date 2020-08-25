@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace MineSweeper
 {
-    public class Settings : ISettings
+    public class Settings : IMSSettings
     {
         private int number = 30;
         public int Rows { get { return number; } set { } }

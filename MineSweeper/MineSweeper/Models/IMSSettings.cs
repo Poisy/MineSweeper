@@ -2,7 +2,10 @@
 
 namespace MineSweeper.Models
 {
-    public interface ISettings
+    /// <summary>
+    /// Interface used for implementing properties for MineSweeper
+    /// </summary>
+    public interface IMSSettings
     {
         int Rows { get; set; }
         int Columns { get; set; }
