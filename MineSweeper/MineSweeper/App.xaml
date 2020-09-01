@@ -6,6 +6,67 @@
              mc:Ignorable="d"
              x:Class="MineSweeper.App">
     <Application.Resources>
+        <ResourceDictionary>
 
+            <!--Background Image Style-->
+            <Style x:Key="BackgroundImageStyle" TargetType="Image">
+                <Setter Property="Source" Value="background.jpg"/>
+                <Setter Property="Aspect" Value="AspectFill"/>
+                <Setter Property="RelativeLayout.HeightConstraint" Value="{ConstraintExpression Type=RelativeToParent, Property=Height}"/>
+                <Setter Property="RelativeLayout.WidthConstraint" Value="{ConstraintExpression Type=RelativeToParent, Property=Width}"/>
+            </Style>
+            
+            <!--Settings ImageButton Style-->
+            <Style x:Key="SettingsStyle" TargetType="ImageButton">
+                <Setter Property="BackgroundColor" Value="Transparent"/>
+                <Setter Property="HorizontalOptions" Value="End"/>
+                <Style.Triggers>
+                    <Trigger TargetType="ImageButton" Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <!--Labels Style-->
+            <Style TargetType="Label">
+                <!--<Setter Property="Margin" Value="10"/>-->
+                <Setter Property="HorizontalTextAlignment" Value="Center"/>
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="TextColor" Value="Black"/>
+            </Style>
+
+            <!--Area Grid Style-->
+            <Style x:Key="AreaGridStyle" TargetType="Grid">
+                <Setter Property="HorizontalOptions" Value="Center"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="RowSpacing" Value="0"/>
+                <Setter Property="ColumnSpacing" Value="0"/>
+                <Setter Property="HeightRequest" Value="1000"/>
+                <Setter Property="WidthRequest" Value="500"/>
+            </Style>
+
+            <!--Area Frame Style-->
+            <Style x:Key="AreaFrameStyle" TargetType="Frame">
+                <Setter Property="CornerRadius" Value="30"/>
+                <Setter Property="BorderColor" Value="#88333333"/>
+                <Setter Property="BackgroundColor" Value="#88333333"/>
+                <Setter Property="Margin" Value="5, 0, 5, 5"/>
+            </Style>
+
+            <!--Timer Image Style-->
+            <Style x:Key="TimerImageStyle" TargetType="Image">
+                <Setter Property="Source" Value="timer_frame.png"/>
+                <Setter Property="HorizontalOptions" Value="Start"/>
+                <Setter Property="VerticalOptions" Value="Start"/>
+                <Setter Property="Aspect" Value="Fill"/>
+            </Style>
+
+            <!--Mines Left Image Style-->
+            <Style x:Key="MinesLeftImageStyle" TargetType="Image">
+                <Setter Property="Source" Value="mines_left_frame.png"/>
+                <Setter Property="Margin" Value="0, 20, 0, 0"/>
+            </Style>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

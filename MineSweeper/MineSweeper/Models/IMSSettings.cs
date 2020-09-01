@@ -13,7 +13,8 @@ namespace MineSweeper.Models
         Color AreaBackground { get; set; }
         Color CellBackground { get; set; }
         Color CellForeground { get; set; }
-        Color CellTextColor { get; set; }
-        Color CellMineColor { get; set; }
+        string FlagSource { get; set; }
+        string MineSource { get; set; }
+        string WrongMineSource { get; set; }
     }
 }

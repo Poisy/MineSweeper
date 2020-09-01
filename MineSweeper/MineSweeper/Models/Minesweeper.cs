@@ -22,6 +22,8 @@ namespace MineSweeper.Models
 
         public bool IsGameOver { get; private set; }
 
+        public int MinesLeft { get; set; }
+
         /// <summary>
         /// Contains methods from the class who initialize this object
         /// </summary>
@@ -35,6 +37,9 @@ namespace MineSweeper.Models
         {
             Settings = settings;
             Notification = notification;
+            MinesLeft = Settings.CountMines;
+
+            Notification.NotifyMinesLeftChanged(MinesLeft);
         }
         #endregion
 
@@ -68,6 +73,10 @@ namespace MineSweeper.Models
         {
             Cells = new Cell[Settings.Columns, Settings.Rows];
 
+            MinesLeft = Settings.CountMines;
+
+            Notification.NotifyMinesLeftChanged(MinesLeft);
+
             for (int x = 0; x < Settings.Columns; x++)
             {
                 for (int y = 0; y < Settings.Rows; y++)
@@ -78,7 +87,7 @@ namespace MineSweeper.Models
 
             Random rnd = new Random();
 
-            for (int i = 0; i < Settings.CountMines; i++)
+            for (int i = 0; i < MinesLeft; i++)
             {
                 int x = rnd.Next(0, Settings.Columns);
                 int y = rnd.Next(0, Settings.Rows);
@@ -133,6 +142,8 @@ namespace MineSweeper.Models
                     temp.Source = null;
                 }
             }
+
+            IsGameOver = false;
         }
 
 
@@ -172,11 +183,30 @@ namespace MineSweeper.Models
 
             if (!Cells[x, y].Show(Cells))
             {
-                cell.BackgroundColor = Settings.CellBackground;
-                cell.Source = "mine";
+                for (int i = 0; i < Cells.GetLength(0); i++)
+                {
+                    for (int j = 0; j < Cells.GetLength(1); j++)
+                    {
+                        if (Cells[i, j].IsMine && !Cells[i, j].IsFlaged)
+                        {
+                            var temp = (cell.Parent as Grid).Children[i * Settings.Rows + j] as ImageButton;
+                            temp.BackgroundColor = Settings.CellBackground;
+                            temp.Source = Settings.MineSource;
+                            continue;
+                        }
+                        if (!Cells[i, j].IsMine && Cells[i, j].IsFlaged)
+                        {
+                            var temp = (cell.Parent as Grid).Children[i * Settings.Rows + j] as ImageButton;
+                            temp.BackgroundColor = Settings.CellBackground;
+                            temp.Source = Settings.WrongMineSource;
+                        }
 
+                    }
+                }
+
+                cell.BackgroundColor = Color.Red;
+                IsGameOver = true;
                 Notification.NotifyGameOver(Cells[x, y]);
-                Console.WriteLine("Game Over");
             }
             else
             {
@@ -191,7 +221,7 @@ namespace MineSweeper.Models
 
                             if (Cells[i, j].IsMine)
                             {
-                                temp.Source = "mine";
+                                temp.Source = Settings.MineSource;
                             }
                             else
                             {
@@ -216,9 +246,22 @@ namespace MineSweeper.Models
 
             ImageButton cell = Notification.RequestArea().Children[x * Settings.Rows + y] as ImageButton;
 
-            cell.Source = "flag";
+            if (Cells[x, y].Visibility) return;
 
-            Cells[x, y].IsFlaged = true;
+            if (Cells[x, y].IsFlaged)
+            {
+                cell.Source = null;
+                Cells[x, y].IsFlaged = false;
+                MinesLeft++;
+            }
+            else
+            {
+                cell.Source = Settings.FlagSource;
+                Cells[x, y].IsFlaged = true;
+                MinesLeft--;
+            }
+
+            Notification.NotifyMinesLeftChanged(MinesLeft);
         }
         #endregion
     }

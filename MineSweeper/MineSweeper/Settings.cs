@@ -12,7 +12,8 @@ namespace MineSweeper
         public Color AreaBackground { get; set; } = Color.Azure;
         public Color CellBackground { get; set; } = Color.LightGray;
         public Color CellForeground { get; set; } = Color.DimGray;
-        public Color CellTextColor { get; set; } = Color.Tomato;
-        public Color CellMineColor { get; set; } = Color.Red;
+        public string FlagSource { get; set; } = "flag_star";
+        public string MineSource { get; set; } = "mine_flame";
+        public string WrongMineSource { get; set; } = "mine_wrong";
     }
 }

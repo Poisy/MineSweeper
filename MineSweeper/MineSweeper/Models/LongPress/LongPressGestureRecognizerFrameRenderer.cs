@@ -120,6 +120,12 @@ namespace MineSweeper.Models.LongPress
             }
         }
 
+        public LongPressBehavior()
+        {
+            _isReleased = true;
+            _duration = Duration;
+        }
+
         public LongPressBehavior(int x, int y)
         {
             _isReleased = true;
