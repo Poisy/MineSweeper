@@ -27,6 +27,10 @@ namespace MineSweeper
             Minesweeper.CreateCells();
 
             Minesweeper.DisplayCells(_area);
+
+            BindingContext = Minesweeper;
+
+            _mines.SetBinding(Label.TextProperty, new Binding("MinesLeft"));
         }
 
         private void OpenMenu(object sender, EventArgs e)
@@ -101,8 +105,6 @@ namespace MineSweeper
 
             DisplayGameNotification();
         }
-
-        public void NotifyMinesLeftChanged(int minesLeft) => _mines.Text = minesLeft.ToString();
 
         public Grid RequestArea() => _area;
     }

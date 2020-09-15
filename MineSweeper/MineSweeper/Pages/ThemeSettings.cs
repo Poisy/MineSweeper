@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Xamarin.Forms;
 using Amporis.Xamarin.Forms.ColorPicker;
 
@@ -21,7 +19,7 @@ namespace MineSweeper.Pages
             StackLayout layout = new StackLayout();
 
             ColorPickerEntry colorPicker = new ColorPickerEntry
-            { 
+            {
                 Color = Settings.GetSettings().Background
             };
 
@@ -30,7 +28,6 @@ namespace MineSweeper.Pages
                 if (e.PropertyName == "Color")
                 {
                     Settings.GetSettings().Background = (sender as ColorPickerEntry).Color;
-                    SettingsPage.DoMainPageNeedRestart = true;
                 }
             };
 
@@ -53,7 +50,6 @@ namespace MineSweeper.Pages
                 if (e.PropertyName == "Color")
                 {
                     Settings.GetSettings().Foreground = (sender as ColorPickerEntry).Color;
-                    SettingsPage.DoMainPageNeedRestart = true;
                 }
             };
 

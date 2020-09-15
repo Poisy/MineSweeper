@@ -3,15 +3,18 @@ using Xamarin.Forms;
 using MineSweeper.Models.LongPress;
 using System.Threading.Tasks;
 using System.Threading;
+using System.ComponentModel;
 
 namespace MineSweeper.Models
 {
     /// <summary>
     /// Main object for the MineSweeper that contains mostly all functionality for the game
     /// </summary>
-    public class Minesweeper
+    public class Minesweeper : INotifyPropertyChanged
     {
-        #region Properties
+        #region Properties and Fields
+        private int minesLeft;
+
         /// <summary>
         /// Contains all the cells
         /// </summary>
@@ -24,7 +27,18 @@ namespace MineSweeper.Models
 
         public bool IsGameOver { get; private set; }
 
-        public int MinesLeft { get; set; }
+        /// <summary>
+        /// Bindable property that shows the how many mines are left (not flaged)
+        /// </summary>
+        public int MinesLeft
+        {
+            get => minesLeft;
+            set
+            {
+                minesLeft = value;
+                OnPropertyChanged(nameof(MinesLeft));
+            }
+        }
 
         /// <summary>
         /// Contains methods from the class who initialize this object
@@ -35,6 +49,8 @@ namespace MineSweeper.Models
         /// This is used for preventing cells to be clicked
         /// </summary>
         private Point invalidCoordinates = new Point();
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private Point PreviousSize { get; set; }
         #endregion
@@ -47,8 +63,6 @@ namespace MineSweeper.Models
             Settings = settings;
             Notification = notification;
             MinesLeft = Settings.CountMines;
-
-            Notification.NotifyMinesLeftChanged(MinesLeft);
         }
         #endregion
 
@@ -86,8 +100,6 @@ namespace MineSweeper.Models
             Cells = new Cell[Settings.Columns, Settings.Rows];
 
             MinesLeft = Settings.CountMines;
-
-            Notification.NotifyMinesLeftChanged(MinesLeft);
 
             for (int x = 0; x < Settings.Columns; x++)
             {
@@ -185,7 +197,12 @@ namespace MineSweeper.Models
         /// <returns></returns>
         private ImageButton CreateCell(int x, int y)
         {
-            ImageButton cell = new ImageButton { BackgroundColor = Settings.Foreground };
+            ImageButton cell = new ImageButton 
+            { 
+                BindingContext = Settings
+            };
+
+            cell.SetBinding(ImageButton.BackgroundColorProperty, new Binding("Foreground"));
 
             Grid.SetRow(cell, y);
             Grid.SetColumn(cell, x);
@@ -222,14 +239,14 @@ namespace MineSweeper.Models
                         if (Cells[i, j].IsMine && !Cells[i, j].IsFlaged)
                         {
                             var temp = (cell.Parent as Grid).Children[i * Settings.Rows + j] as ImageButton;
-                            temp.BackgroundColor = Settings.Background;
+                            temp.SetBinding(ImageButton.BackgroundColorProperty, new Binding("Background"));
                             temp.Source = Settings.MineSource;
                             continue;
                         }
                         if (!Cells[i, j].IsMine && Cells[i, j].IsFlaged)
                         {
                             var temp = (cell.Parent as Grid).Children[i * Settings.Rows + j] as ImageButton;
-                            temp.BackgroundColor = Settings.Background;
+                            temp.SetBinding(ImageButton.BackgroundColorProperty, new Binding("Background"));
                             temp.Source = Settings.WrongMineSource;
                         }
 
@@ -249,7 +266,7 @@ namespace MineSweeper.Models
                         if (Cells[i, j].Visibility)
                         {
                             var temp = (cell.Parent as Grid).Children[i * Settings.Rows + j] as ImageButton;
-                            temp.BackgroundColor = Settings.Background;
+                            temp.SetBinding(ImageButton.BackgroundColorProperty, new Binding("Background"));
 
                             if (Cells[i, j].IsMine)
                             {
@@ -293,14 +310,22 @@ namespace MineSweeper.Models
                 MinesLeft--;
             }
 
-            Notification.NotifyMinesLeftChanged(MinesLeft);
-
             await Task.Run(() =>
             {
                 Thread.Sleep(100);
 
                 invalidCoordinates = new Point(x, y);
             });
+        }
+
+        /// <summary>
+        /// Used for Binding
+        /// </summary>
+        private void OnPropertyChanged(string name)
+        {
+            if (name == null || PropertyChanged == null) return;
+
+            PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
         #endregion
     }

@@ -4,22 +4,74 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.ComponentModel;
 
 namespace MineSweeper
 {
-    public class Settings : IMSSettings 
+    public class Settings : IMSSettings
     {
         private static Settings instance;
+        private int areaSize;
+        private int countMines;
+        private Color background;
+        private Color foreground;
 
-        public int AreaSize { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public int AreaSize
+        {
+            get => areaSize;
+            set
+            {
+                if (value * (value / 2) >= countMines)
+                {
+                    areaSize = value;
+                    OnPropertyChanged(nameof(AreaSize));
+                }
+            }
+        }
         public int Rows { get { return AreaSize; } set { } }
         public int Columns { get { return AreaSize / 2; } set { } }
-        public int CountMines { get; set; }
-        public Color Background { get; set; }
-        public Color Foreground { get; set; }
+        public int CountMines
+        {
+            get => countMines;
+            set
+            {
+                if (value <= areaSize * (areaSize / 2))
+                {
+                    countMines = value;
+                    OnPropertyChanged(nameof(CountMines));
+                }
+            }
+        }
+        public Color Background
+        {
+            get => background;
+            set
+            {
+                background = value;
+                OnPropertyChanged(nameof(Background));
+            }
+        }
+        public Color Foreground
+        {
+            get => foreground;
+            set
+            {
+                foreground = value;
+                OnPropertyChanged(nameof(Foreground));
+            }
+        }
         public string FlagSource { get; set; }
         public string MineSource { get; set; }
         public string WrongMineSource { get; set; }
+
+        private void OnPropertyChanged(string name)
+        {
+            if (name == null || PropertyChanged == null) return;
+
+            PropertyChanged(this, new PropertyChangedEventArgs(name));
+        }
 
         private Dictionary<string, string> DataSettings { get; set; }
 

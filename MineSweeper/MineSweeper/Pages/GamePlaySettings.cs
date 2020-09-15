@@ -20,22 +20,19 @@ namespace MineSweeper.Pages
             {
                 Maximum = 300,
                 Minimum = 1,
-                Value = Settings.GetSettings().CountMines
+                BindingContext = Settings.GetSettings()
             };
+
+            minesCountSlider.SetBinding(Slider.ValueProperty, new Binding("CountMines"));
 
             minesCountSlider.ValueChanged += (sender, e) =>
             {
-                double newValue = Math.Round(e.NewValue / 5) * 5;
-                double oldValue = Math.Round(e.OldValue / 5) * 5;
-
-                if (newValue > Settings.GetSettings().AreaSize * (Settings.GetSettings().AreaSize / 2))
+                if (e.NewValue > Settings.GetSettings().AreaSize * (Settings.GetSettings().AreaSize / 2))
                 {
-                    minesCountSlider.Value = oldValue;
+                    minesCountSlider.Value = Math.Round(e.OldValue);
                 }
                 else
                 {
-                    minesCountSlider.Value = newValue;
-                    Settings.GetSettings().CountMines = (int)newValue;
                     SettingsPage.DoMainPageNeedRestart = true;
                 }
             };
@@ -62,22 +59,19 @@ namespace MineSweeper.Pages
             {
                 Maximum = 50,
                 Minimum = 1,
-                Value = Settings.GetSettings().AreaSize
+                BindingContext = Settings.GetSettings()
             };
+
+            minesCountSlider.SetBinding(Slider.ValueProperty, new Binding("AreaSize"));
 
             minesCountSlider.ValueChanged += (sender, e) =>
             {
-                double newValue = Math.Round(e.NewValue);
-                double oldValue = Math.Round(e.OldValue);
-
-                if (newValue * (newValue / 2) < Settings.GetSettings().CountMines)
+                if (e.NewValue * (e.NewValue / 2) < Settings.GetSettings().CountMines)
                 {
-                    minesCountSlider.Value = oldValue;
+                    minesCountSlider.Value = Math.Round(e.OldValue);
                 }
                 else
                 {
-                    minesCountSlider.Value = newValue;
-                    Settings.GetSettings().AreaSize = (int)minesCountSlider.Value;
                     SettingsPage.DoMainPageNeedRestart = true;
                 }
             };
