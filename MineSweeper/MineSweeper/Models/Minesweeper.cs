@@ -1,6 +1,8 @@
 ﻿using System;
 using Xamarin.Forms;
 using MineSweeper.Models.LongPress;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace MineSweeper.Models
 {
@@ -28,6 +30,13 @@ namespace MineSweeper.Models
         /// Contains methods from the class who initialize this object
         /// </summary>
         private IMSNotification Notification { get; set; }
+
+        /// <summary>
+        /// This is used for preventing cells to be clicked
+        /// </summary>
+        private Point invalidCoordinates = new Point();
+
+        private Point PreviousSize { get; set; }
         #endregion
 
 
@@ -51,7 +60,10 @@ namespace MineSweeper.Models
         /// </summary>
         public void CreateArea(Grid _area)
         {
-            _area.BackgroundColor = Settings.AreaBackground;
+            _area.BackgroundColor = Color.Azure;
+
+            _area.ColumnDefinitions.Clear();
+            _area.RowDefinitions.Clear();
 
             for (int i = 0; i < Settings.Rows; i++)
             {
@@ -69,7 +81,7 @@ namespace MineSweeper.Models
         /// Creates <see cref="Cell"/> objects that are empty cells or mines. 
         /// The number of cells and mines depends in the <see cref="Settings"/> property
         /// </summary>
-        public void CreateCells()
+         public void CreateCells()
         {
             Cells = new Cell[Settings.Columns, Settings.Rows];
 
@@ -119,6 +131,8 @@ namespace MineSweeper.Models
                     _area.Children.Add(CreateCell(x, y));
                 }
             }
+
+            PreviousSize = new Point(Settings.Columns, Settings.Rows);
         }
 
 
@@ -128,18 +142,34 @@ namespace MineSweeper.Models
         /// </summary>
         public void Restart(Grid _area)
         {
+            CreateArea(_area);
+
             CreateCells();
 
-            for (int x = 0; x < Settings.Columns; x++)
+            if (PreviousSize.X != Settings.Columns || PreviousSize.Y != Settings.Rows)
             {
-                for (int y = 0; y < Settings.Rows; y++)
+                _area.Children.Clear();
+
+                DisplayCells(_area);
+
+                PreviousSize = new Point(Settings.Columns, Settings.Rows);
+            }
+            else
+            {
+                for (int x = 0; x < Settings.Columns; x++)
                 {
-                    Cells[x, y].ScanNearbyCells(Cells);
+                    for (int y = 0; y < Settings.Rows; y++)
+                    {
+                        Cells[x, y].ScanNearbyCells(Cells);
 
-                    ImageButton temp = (_area.Children[x * Settings.Rows + y] as ImageButton);
+                        ImageButton temp = (_area.Children[x * Settings.Rows + y] as ImageButton);
 
-                    temp.BackgroundColor = Settings.CellForeground;
-                    temp.Source = null;
+                        Grid.SetRow(temp, y);
+                        Grid.SetColumn(temp, x);
+
+                        temp.BackgroundColor = Settings.Foreground;
+                        temp.Source = null;
+                    }
                 }
             }
 
@@ -155,7 +185,7 @@ namespace MineSweeper.Models
         /// <returns></returns>
         private ImageButton CreateCell(int x, int y)
         {
-            ImageButton cell = new ImageButton { BackgroundColor = Settings.CellForeground };
+            ImageButton cell = new ImageButton { BackgroundColor = Settings.Foreground };
 
             Grid.SetRow(cell, y);
             Grid.SetColumn(cell, x);
@@ -181,6 +211,8 @@ namespace MineSweeper.Models
             int x = Grid.GetColumn(cell);
             int y = Grid.GetRow(cell);
 
+            if (invalidCoordinates.X == x && invalidCoordinates.Y == y) return;
+
             if (!Cells[x, y].Show(Cells))
             {
                 for (int i = 0; i < Cells.GetLength(0); i++)
@@ -190,14 +222,14 @@ namespace MineSweeper.Models
                         if (Cells[i, j].IsMine && !Cells[i, j].IsFlaged)
                         {
                             var temp = (cell.Parent as Grid).Children[i * Settings.Rows + j] as ImageButton;
-                            temp.BackgroundColor = Settings.CellBackground;
+                            temp.BackgroundColor = Settings.Background;
                             temp.Source = Settings.MineSource;
                             continue;
                         }
                         if (!Cells[i, j].IsMine && Cells[i, j].IsFlaged)
                         {
                             var temp = (cell.Parent as Grid).Children[i * Settings.Rows + j] as ImageButton;
-                            temp.BackgroundColor = Settings.CellBackground;
+                            temp.BackgroundColor = Settings.Background;
                             temp.Source = Settings.WrongMineSource;
                         }
 
@@ -217,7 +249,7 @@ namespace MineSweeper.Models
                         if (Cells[i, j].Visibility)
                         {
                             var temp = (cell.Parent as Grid).Children[i * Settings.Rows + j] as ImageButton;
-                            temp.BackgroundColor = Settings.CellBackground;
+                            temp.BackgroundColor = Settings.Background;
 
                             if (Cells[i, j].IsMine)
                             {
@@ -237,7 +269,7 @@ namespace MineSweeper.Models
         /// <summary>
         /// Long press event for visual cell (<see cref="ImageButton"/>)
         /// </summary>
-        private void AddLongPressGesture (object sender, EventArgs e)
+        private async void AddLongPressGesture (object sender, EventArgs e)
         {
             var temp = (sender as LongPressBehavior);
 
@@ -262,6 +294,13 @@ namespace MineSweeper.Models
             }
 
             Notification.NotifyMinesLeftChanged(MinesLeft);
+
+            await Task.Run(() =>
+            {
+                Thread.Sleep(100);
+
+                invalidCoordinates = new Point(x, y);
+            });
         }
         #endregion
     }

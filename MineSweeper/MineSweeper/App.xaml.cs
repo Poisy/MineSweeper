@@ -1,5 +1,4 @@
-﻿using System;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 
 namespace MineSweeper
 {
@@ -9,7 +8,7 @@ namespace MineSweeper
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            MainPage = new NavigationPage(new MainPage());
         }
 
         protected override void OnStart()
@@ -18,6 +17,7 @@ namespace MineSweeper
 
         protected override void OnSleep()
         {
+            Settings.GetSettings().Save();
         }
 
         protected override void OnResume()

@@ -9,7 +9,7 @@ using Android.OS;
 
 namespace MineSweeper.Droid
 {
-    [Activity(Label = "MineSweeper", Icon = "@mipmap/icon", Theme = "@style/MainTheme")] /*MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]*/
+    [Activity(Label = "MineSweeper", Icon = "@drawable/icon", Theme = "@style/MainTheme")] /*MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]*/
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)

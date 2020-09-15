@@ -10,9 +10,8 @@ namespace MineSweeper.Models
         int Rows { get; set; }
         int Columns { get; set; }
         int CountMines { get; set; }
-        Color AreaBackground { get; set; }
-        Color CellBackground { get; set; }
-        Color CellForeground { get; set; }
+        Color Background { get; set; }
+        Color Foreground { get; set; }
         string FlagSource { get; set; }
         string MineSource { get; set; }
         string WrongMineSource { get; set; }

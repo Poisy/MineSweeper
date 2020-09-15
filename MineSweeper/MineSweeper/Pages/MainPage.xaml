@@ -6,9 +6,10 @@
              xmlns:local="clr-namespace:MineSweeper.Models.LongPress"
              mc:Ignorable="d"
              x:Class="MineSweeper.MainPage"
-             Title="MineSweeper">
+             Title="MineSweeper"
+             NavigationPage.HasNavigationBar="False">
 
-    <Grid>
+    <Grid x:Name="_mainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="5*"/>
             <ColumnDefinition Width="8*"/>
@@ -39,12 +40,8 @@
         </Grid>
 
         <!--Settings Image-->
-        <ImageButton x:Name="_settings" Grid.Row="0" Grid.Column="1" Clicked="OpenSettings" Style="{StaticResource SettingsStyle}">
-            <ImageButton.Behaviors>
-                <local:LongPressBehavior LongPressed="Restart"/>
-            </ImageButton.Behaviors>
-        </ImageButton>
-        
+        <ImageButton x:Name="_settings" Grid.Row="0" Grid.Column="1" Clicked="OpenMenu" Style="{StaticResource SettingsStyle}"/>
+
         <!--Mines Left-->
         <Grid Grid.Row="0" Grid.Column="2">
             <Grid.RowDefinitions>
@@ -58,7 +55,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Image Grid.ColumnSpan="3" Grid.RowSpan="3" x:Name="_minesImage" Style="{StaticResource MinesLeftImageStyle}"/>
-            <Label Grid.Row="1" Grid.Column="1" x:Name="_mines"/>
+            <Label Grid.Row="1" Grid.Column="1" x:Name="_mines" TextColor="White"/>
         </Grid>
 
         <!--Area-->

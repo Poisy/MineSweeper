@@ -8,6 +8,17 @@
     <Application.Resources>
         <ResourceDictionary>
 
+            <!--Font Awesome-->
+            <OnPlatform x:TypeArguments="x:String" x:Key="FontAwesomeBrands">
+                <On Platform="Android" Value="FontAwesomeBrands.ttf#Font Awesome 5 Brands Regular" />
+            </OnPlatform>
+            <OnPlatform x:TypeArguments="x:String" x:Key="FontAwesomeRegular">
+                <On Platform="Android"  Value="FontAwesomeRegular.ttf#Font Awesome 5 Free Regular" />
+            </OnPlatform>
+            <OnPlatform x:TypeArguments="x:String" x:Key="FontAwesomeSolid">
+                <On Platform="Android"  Value="FontAwesomeSolid.ttf#Font Awesome 5 Free Solid" />
+            </OnPlatform>
+
             <!--Background Image Style-->
             <Style x:Key="BackgroundImageStyle" TargetType="Image">
                 <Setter Property="Source" Value="background.jpg"/>
@@ -67,6 +78,26 @@
                 <Setter Property="Source" Value="mines_left_frame.png"/>
                 <Setter Property="Margin" Value="0, 20, 0, 0"/>
             </Style>
+
+            <!--MenuView Icon Label Style-->
+            <Style TargetType="Label" x:Key="IconLabelStyle">
+                <Setter Property="FontFamily" Value="{StaticResource FontAwesomeSolid}"/>
+                <Setter Property="TextColor" Value="Pink"/>
+                <Setter Property="FontSize" Value="30"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="HorizontalOptions" Value="End"/>
+            </Style>
+
+            <Style x:Key="DefaultSettingsButtonStyle" TargetType="Button">
+                <Setter Property="CornerRadius" Value="7"/>
+                <Setter Property="BackgroundColor" Value="#bb333333"/>
+                <Setter Property="Text" Value="  Default  "/>
+                <Setter Property="TextColor" Value="White"/>
+                <Setter Property="VerticalOptions" Value="End"/>
+                <Setter Property="HorizontalOptions" Value="Center"/>
+                <Setter Property="Margin" Value="0, 0, 0, 20"/>
+            </Style>
+            
         </ResourceDictionary>
     </Application.Resources>
 </Application>

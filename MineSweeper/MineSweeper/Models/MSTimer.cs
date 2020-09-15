@@ -5,7 +5,7 @@ namespace MineSweeper.Models
 {
     public class MSTimer
     {
-        private TimeSpan timer = new TimeSpan(0, 0, 0);
+        private TimeSpan timer = new TimeSpan(0, 0, -1);
         public bool IsPaused { get; set; } = false;
         public string Timer
         {
@@ -31,7 +31,7 @@ namespace MineSweeper.Models
 
         public void Reset()
         {
-            timer = new TimeSpan(0, 0, 0);
+            timer = new TimeSpan(0, 0, -1);
         }
 
     }

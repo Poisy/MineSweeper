@@ -16,7 +16,7 @@ namespace MineSweeper
         {
             InitializeComponent();
 
-            Minesweeper = new Minesweeper(new Settings(), this);
+            Minesweeper = new Minesweeper(Settings.GetSettings(), this);
 
             Timer.Start(_timer);
 
@@ -29,18 +29,25 @@ namespace MineSweeper
             Minesweeper.DisplayCells(_area);
         }
 
-        private void OpenSettings(object sender, EventArgs e)
+        private void OpenMenu(object sender, EventArgs e)
         {
-            if (Minesweeper.IsGameOver) return;
-
-            if (Timer.IsPaused)
+            if (_mainGrid.Children.Count == 5)
             {
-                Continue();
-            }
-            else
-            {
+                _mainGrid.Children.Add(new MenuView(Navigation, this));
                 Pause();
+                return;
             }
+
+            if (_mainGrid.Children[_mainGrid.Children.Count - 1].IsVisible) return;
+
+            _mainGrid.Children[_mainGrid.Children.Count - 1].IsVisible = true;
+            Pause();
+        }
+
+        public void CloseMenu()
+        {
+            _mainGrid.Children[_mainGrid.Children.Count - 1].IsVisible = false;
+            Continue();
         }
 
         private void Pause()
@@ -57,12 +64,7 @@ namespace MineSweeper
             _area.IsEnabled = true;
         }
 
-        private void Restart(object sender, EventArgs e)
-        {
-            Restart();
-        }
-
-        private void Restart()
+        public void Restart()
         {
             Minesweeper.Restart(_area);
 
@@ -74,9 +76,30 @@ namespace MineSweeper
             _settings.Source = "stamp_" + random.Next(1, 26).ToString() + ".png";
         }
 
+        private async void DisplayGameNotification()
+        {
+            string title;
+            string text;
+
+            if (Minesweeper.MinesLeft > 0)
+            {
+                title = "Failed";
+                text = "BOOM!! You didn't survive that!";
+            }
+            else
+            {
+                title = "Victory!";
+                text = "Good job!";
+            }
+
+            await DisplayAlert(title, text, "OK");
+        }
+
         public void NotifyGameOver(Models.Cell cell)
         {
             Pause();
+
+            DisplayGameNotification();
         }
 
         public void NotifyMinesLeftChanged(int minesLeft) => _mines.Text = minesLeft.ToString();
