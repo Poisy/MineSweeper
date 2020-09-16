@@ -8,7 +8,10 @@ namespace MineSweeper
         {
             InitializeComponent();
 
-            MainPage = new NavigationPage(new MainPage());
+            NavigationPage navigation = new NavigationPage();
+            navigation.PushAsync(new MainPage(), true);
+            NavigationPage.SetHasNavigationBar(navigation, false);
+            MainPage = navigation;
         }
 
         protected override void OnStart()

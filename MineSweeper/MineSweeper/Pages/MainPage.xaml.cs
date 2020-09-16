@@ -22,18 +22,18 @@ namespace MineSweeper
 
             RecreateSettingsImage();
 
-            Minesweeper.CreateArea(_area);
+            Minesweeper.CreateArea();
 
             Minesweeper.CreateCells();
-
-            Minesweeper.DisplayCells(_area);
 
             BindingContext = Minesweeper;
 
             _mines.SetBinding(Label.TextProperty, new Binding("MinesLeft"));
+
+            _area.Content = Minesweeper;
         }
 
-        private void OpenMenu(object sender, EventArgs e)
+        private async void OpenMenu(object sender, EventArgs e)
         {
             if (_mainGrid.Children.Count == 5)
             {
@@ -42,15 +42,16 @@ namespace MineSweeper
                 return;
             }
 
-            if (_mainGrid.Children[_mainGrid.Children.Count - 1].IsVisible) return;
-
-            _mainGrid.Children[_mainGrid.Children.Count - 1].IsVisible = true;
-            Pause();
+            if (!MenuView.IsOpen)
+            {
+                await (_mainGrid.Children[_mainGrid.Children.Count - 1] as MenuView).BeginAnimation();
+                Pause();
+            }
         }
 
-        public void CloseMenu()
+        public async void CloseMenu()
         {
-            _mainGrid.Children[_mainGrid.Children.Count - 1].IsVisible = false;
+            await (_mainGrid.Children[_mainGrid.Children.Count - 1] as MenuView).CloseAnimation();
             Continue();
         }
 
@@ -70,7 +71,9 @@ namespace MineSweeper
 
         public void Restart()
         {
-            Minesweeper.Restart(_area);
+            Minesweeper.Restart();
+
+            RecreateSettingsImage();
 
             Timer.Reset();
         }
@@ -105,7 +108,5 @@ namespace MineSweeper
 
             DisplayGameNotification();
         }
-
-        public Grid RequestArea() => _area;
     }
 }

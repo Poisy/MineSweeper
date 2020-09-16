@@ -6,7 +6,7 @@ namespace MineSweeper.Models
     /// <summary>
     /// Represents a single cell in MineSweeper
     /// </summary>
-    public class Cell
+    public class Cell : ImageButton
     {
         #region Properties
         public int Row { get; private set; }
@@ -40,22 +40,60 @@ namespace MineSweeper.Models
         #region Constructors
         public Cell(int x, int y, bool isMine = false)
         {
-            Column = x;
-            Row = y;
+            Row = x;
+            Column = y;
             IsMine = isMine;
+
+            Grid.SetColumn(this, y);
+            Grid.SetRow(this, x);
+
+            SetBinding(ImageButton.BackgroundColorProperty, new Binding("Foreground"));
         }
         #endregion
 
 
 
         #region Methods
+
+
+        /// <summary>
+        /// Placing a image in the Cell
+        /// </summary>
+        public void SetSource(string source)
+        {
+            Source = source;
+        }
+
+
+        /// <summary>
+        /// Shows the background of the Cell
+        /// </summary>
+        public void Unhide()
+        {
+            SetBinding(ImageButton.BackgroundColorProperty, new Binding("Background"));
+        }
+
+
+        /// <summary>
+        /// Sets the Cell to the default settings
+        /// </summary>
+        public void Reset()
+        {
+            SetBinding(ImageButton.BackgroundColorProperty, new Binding("Foreground"));
+            Source = null;
+            IsMine = false;
+            IsFlaged = false;
+            Visibility = false;
+        }
+
+
         /// <summary>
         /// If the cell is empty it makes itself visible and also the cells near it. Return true. <br/>
         /// If the cell is a mine, it shows only itself. Return false<br/>
         /// If the cell is a flaged, nothing happens. Return true
         /// </summary>
         /// <param name="cells">Used for showing off nearby cells</param>
-        public bool Show(Cell[,] cells)
+        public bool Show(List<Cell> cells, int maxRow, int maxColumn)
         {
             if (IsFlaged) return true;
 
@@ -63,7 +101,7 @@ namespace MineSweeper.Models
 
             if (IsMine) return false;
 
-            ShowNearby(cells, Column, Row, new List<int[]>());
+            ShowNearby(cells, Row, Column, new List<int[]>(), maxRow, maxColumn);
 
             return true;
         }
@@ -73,23 +111,23 @@ namespace MineSweeper.Models
         /// Makes for each <see cref="Cell"/> <see cref="MinesNerby"/> equal to the number of the mines that are near 
         /// </summary>
         /// <param name="cells"></param>
-        public void ScanNearbyCells(Cell[,] cells)
+        public void ScanNearbyCells(List<Cell> cells, int maxRow, int maxColumn)
         {
             MinesNerby = 0;
 
             if (!IsMine)
             {
-                for (int x = Column - 1; x <= Column + 1; x++)
+                for (int x = Row - 1; x <= Row + 1; x++)
                 {
-                    for (int y = Row - 1; y <= Row + 1; y++)
+                    for (int y = Column - 1; y <= Column + 1; y++)
                     {
-                        if (x == Column && y == Row) continue;
+                        if (x == Row && y == Column) continue;
 
-                        if (x >= 0 && x < cells.GetLength(0))
+                        if (x >= 0 && x < maxRow)
                         {
-                            if (y >= 0 && y < cells.GetLength(1))
+                            if (y >= 0 && y < maxColumn)
                             {
-                                if (cells[x, y].IsMine)
+                                if (cells[x * maxColumn + y].IsMine)
                                 {
                                     MinesNerby++;
                                 }
@@ -104,33 +142,33 @@ namespace MineSweeper.Models
         /// <summary>
         /// Recursive method for rapidly calling nearby cells to review themselfs
         /// </summary>
-        private void ShowNearby(Cell[,] cells, int col, int row, List<int[]> visitedCells)
+        private void ShowNearby(List<Cell> cells, int row, int col, List<int[]> visitedCells, int maxRow, int maxColumn)
         {
             foreach (var x in visitedCells)
             {
-                if (x[0] == col && x[1] == row) return;
+                if (x[0] == row && x[1] == col) return;
             }
 
-            visitedCells.Add(new int[] { col, row });
+            visitedCells.Add(new int[] { row, col });
 
-            if (col >= 0 && col < cells.GetLength(0))
+            if (col >= 0 && col < maxColumn)
             {
-                if (row >= 0 && row < cells.GetLength(1))
+                if (row >= 0 && row < maxRow)
                 {
-                    if (!cells[col, row].IsMine && !cells[col, row].IsFlaged)
+                    if (!cells[row * maxColumn + col].IsMine && !cells[row * maxColumn + col].IsFlaged)
                     {
-                        cells[col, row].Visibility = true;
+                        cells[row * maxColumn + col].Visibility = true;
 
-                        if (CheckNearbyForMines(cells, cells[col, row]))
+                        if (CheckNearbyForMines(cells, cells[row * maxColumn + col], maxRow, maxColumn))
                         {
-                            ShowNearby(cells, col - 1, row, visitedCells);
-                            ShowNearby(cells, col + 1, row, visitedCells);
-                            ShowNearby(cells, col, row - 1, visitedCells);
-                            ShowNearby(cells, col, row + 1, visitedCells);
-                            ShowNearby(cells, col - 1, row + 1, visitedCells);
-                            ShowNearby(cells, col + 1, row - 1, visitedCells);
-                            ShowNearby(cells, col - 1, row - 1, visitedCells);
-                            ShowNearby(cells, col + 1, row + 1, visitedCells);
+                            ShowNearby(cells, row, col - 1, visitedCells, maxRow, maxColumn);
+                            ShowNearby(cells, row, col + 1, visitedCells, maxRow, maxColumn);
+                            ShowNearby(cells, row - 1, col, visitedCells, maxRow, maxColumn);
+                            ShowNearby(cells, row + 1, col, visitedCells, maxRow, maxColumn);
+                            ShowNearby(cells, row + 1, col - 1, visitedCells, maxRow, maxColumn);
+                            ShowNearby(cells, row - 1, col + 1, visitedCells, maxRow, maxColumn);
+                            ShowNearby(cells, row - 1, col - 1, visitedCells, maxRow, maxColumn);
+                            ShowNearby(cells, row + 1, col + 1, visitedCells, maxRow, maxColumn);
                         }
                     }
                 }
@@ -139,56 +177,55 @@ namespace MineSweeper.Models
 
 
         /// <summary>
-        /// Used in <see cref="ShowNearby(Cell[,], int, int, List{int[]})"/>
+        /// Used in <see cref="ShowNearby(List{Cell}, int, int, List{int[]})"/>
         /// for checking if there are mines nearby the cell
         /// </summary>
-        private bool CheckNearbyForMines(Cell[,] cells, Cell cell)
+        private bool CheckNearbyForMines(List<Cell> cells, Cell cell, int maxRow, int maxColumn)
         {
-            int colLength = cells.GetLength(0);
-            int rowLength = cells.GetLength(1);
+            if (cell.Row > 0)
+            {
+                if (cells[(cell.Row - 1) * maxColumn + cell.Column].IsMine) return false;
+            }
+
+            if (cell.Row < maxRow - 1)
+            {
+                if (cells[(cell.Row + 1) * maxColumn + cell.Column].IsMine) return false;
+            }
 
             if (cell.Column > 0)
             {
-                if (cells[cell.Column - 1, cell.Row].IsMine) return false;
+                if (cells[cell.Row * maxColumn + cell.Column - 1].IsMine) return false;
             }
 
-            if (cell.Column < colLength - 1)
+            if (cell.Column < maxColumn - 1)
             {
-                if (cells[cell.Column + 1, cell.Row].IsMine) return false;
-            }
-
-            if (cell.Row > 0)
-            {
-                if (cells[cell.Column, cell.Row - 1].IsMine) return false;
-            }
-
-            if (cell.Row < rowLength - 1)
-            {
-                if (cells[cell.Column, cell.Row + 1].IsMine) return false;
+                if (cells[cell.Row * maxColumn + cell.Column + 1].IsMine) return false;
             }
 
             if (cell.Column > 0 && cell.Row > 0)
             {
-                if (cells[cell.Column - 1, cell.Row - 1].IsMine) return false;
+                if (cells[(cell.Row - 1) * maxColumn + cell.Column - 1].IsMine) return false;
             }
 
-            if (cell.Column < colLength - 1 && cell.Row < rowLength - 1)
+            if (cell.Column < maxColumn - 1 && cell.Row < maxRow - 1)
             {
-                if (cells[cell.Column + 1, cell.Row + 1].IsMine) return false;
-            }
-            
-            if (cell.Column > 0 && cell.Row < rowLength - 1)
-            {
-                if (cells[cell.Column - 1, cell.Row + 1].IsMine) return false;
+                if (cells[(cell.Row + 1) * maxColumn + cell.Column + 1].IsMine) return false;
             }
 
-            if (cell.Column < colLength - 1 && cell.Row > 0)
+            if (cell.Column < maxColumn - 1 && cell.Row > 0)
             {
-                if (cells[cell.Column + 1, cell.Row - 1].IsMine) return false;
+                if (cells[(cell.Row - 1) * maxColumn + cell.Column + 1].IsMine) return false;
+            }
+
+            if (cell.Column > 0 && cell.Row < maxRow - 1)
+                {
+                if (cells[(cell.Row + 1) * maxColumn + cell.Column - 1].IsMine) return false;
             }
 
             return true;
         }
+
+
         #endregion
     }
 }

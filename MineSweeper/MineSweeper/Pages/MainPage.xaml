@@ -59,9 +59,7 @@
         </Grid>
 
         <!--Area-->
-        <Frame Grid.Row="1" Grid.ColumnSpan="3" Style="{StaticResource AreaFrameStyle}">
-            <Grid x:Name="_area" Style="{StaticResource AreaGridStyle}"/>
-        </Frame>
+        <Frame x:Name="_area" Grid.Row="1" Grid.ColumnSpan="3" Style="{StaticResource AreaFrameStyle}"/>
     </Grid>
 
 </ContentPage>

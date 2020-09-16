@@ -1,12 +1,21 @@
 ﻿using MineSweeper.Pages;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace MineSweeper.Models
 {
     public class MenuView : ListView
     {
+        public static bool IsOpen { get; set; } = false;
+
         public MenuView(INavigation navigation, MainPage mainPage)
         {
+            IsOpen = true;
+            Opacity = 0;
+            Scale = 0;
+
+            Task.Run(async () => await BeginAnimation());
+
             Grid.SetColumn(this, 0);
             Grid.SetColumnSpan(this, 3);
 
@@ -32,10 +41,6 @@ namespace MineSweeper.Models
 
                 switch (option.Name)
                 {
-                    case "Settings":
-                        mainPage.CloseMenu();
-                        await navigation.PushAsync(new SettingsPage(mainPage), true);
-                        break;
                     case "Resume":
                         mainPage.CloseMenu();
                         break;
@@ -44,13 +49,31 @@ namespace MineSweeper.Models
                         mainPage.Restart();
                         break;
                     case "Records":
-                        mainPage.CloseMenu();
-                        await navigation.PushAsync(new RecordsPage(), true);
+                        await navigation.PushModalAsync(new RecordsPage(), true);
+                        break;
+                    case "Settings":
+                        await navigation.PushModalAsync(new SettingsPage(mainPage), true);
                         break;
                 }
 
                 SelectedItem = null;
             };
+        }
+
+        public async Task BeginAnimation()
+        {
+            IsOpen = true;
+            IsEnabled = true;
+            await this.FadeTo(1);
+            await this.ScaleTo(1);
+        }
+
+        public async Task CloseAnimation()
+        {
+            IsOpen = false;
+            IsEnabled = false;
+            await this.FadeTo(0);
+            await this.ScaleTo(0);
         }
 
         class MenuOption
