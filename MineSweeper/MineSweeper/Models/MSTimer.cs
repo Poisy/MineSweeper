@@ -5,7 +5,8 @@ namespace MineSweeper.Models
 {
     public class MSTimer
     {
-        private TimeSpan timer = new TimeSpan(0, 0, -1);
+        public static bool HasStarted { get; private set; } = false;
+        private TimeSpan timer = new TimeSpan(0, 0, 0);
         public bool IsPaused { get; set; } = false;
         public string Timer
         {
@@ -15,9 +16,11 @@ namespace MineSweeper.Models
 
         public void Start(Label _timer)
         {
+            HasStarted = true;
+
             Device.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
-                if (!IsPaused)
+                if (!IsPaused && MainPage.HasGameStarted)
                 {
                     Device.BeginInvokeOnMainThread(() => {
                         timer = timer.Add(new TimeSpan(0, 0, 1));
@@ -31,7 +34,7 @@ namespace MineSweeper.Models
 
         public void Reset()
         {
-            timer = new TimeSpan(0, 0, -1);
+            timer = new TimeSpan(0, 0, 0);
         }
 
     }

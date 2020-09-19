@@ -1,10 +1,4 @@
 ﻿using MineSweeper.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -16,36 +10,68 @@ namespace MineSweeper.Pages
         public RecordsPage()
         {
             InitializeComponent();
+
+            _recordsListView.ItemsSource = RecordsDatabase.GetInstance().GetRecords().Result;
+
+            _recordsListView.ItemTemplate = new DataTemplate(typeof(RecordCell));
+
+            _recordsListView.ItemTapped += RecordSelected;
+
+            _recordsListView.RowHeight = 50;
         }
 
-        Grid CreateRecordCell(Record record)
+        private async void RecordSelected(object sender, ItemTappedEventArgs e)
         {
-            Grid recordCell = new Grid();
+            Record record = e.Item as Record;
 
-            for (int i = 0; i < 4; i++)
+            bool willDeleteRecord = await DisplayAlert(record.ToString(), "Do you want to delete this record ?", "Yes", "No");
+
+            if (willDeleteRecord)
             {
-                recordCell.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Star });
+                await RecordsDatabase.GetInstance().DeleteRecord(record);
+
+                _recordsListView.ItemsSource = RecordsDatabase.GetInstance().GetRecords().Result;
+            }
+        }
+
+        class RecordCell : ViewCell
+        {
+            public RecordCell()
+            {
+                Grid recordCell = new Grid
+                {
+                    Padding = new Thickness(3, 0, 3, 0),
+                    Margin = 5,
+                    BackgroundColor = Color.FromHex("#AAE64B86")
+                };
+
+                recordCell.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
+                recordCell.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
+                recordCell.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star) });
+                recordCell.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(2, GridUnitType.Star) });
+
+                recordCell.Children.Add(CreateLabel("Time", 0, 20));
+                recordCell.Children.Add(CreateLabel("MinesCount", 1, 20));
+                recordCell.Children.Add(CreateLabel("AreaSize", 2, 20));
+                recordCell.Children.Add(CreateLabel("DateString", 3, 15));
+
+                View = recordCell;
             }
 
-            recordCell.Children.Add(CreateLabel(record.Time, 0));
-            recordCell.Children.Add(CreateLabel(record.MinesCount, 1));
-            recordCell.Children.Add(CreateLabel(record.AreaSize, 2));
-            recordCell.Children.Add(CreateLabel(record.Date.ToString(), 3));
+            Label CreateLabel(string propName, int column, int size)
+            {
+                Label label = new Label
+                {
+                    FontSize = size,
+                    TextColor = Color.White,
+                    VerticalTextAlignment = TextAlignment.Center
+                };
 
-            return recordCell;
-        }
+                label.SetBinding(Label.TextProperty, propName);
+                Grid.SetColumn(label, column);
 
-        Label CreateLabel(string name, int column)
-        {
-            Label label = new Label 
-            { 
-                Text = name,
-                // Customise Labels Here
-            };
-
-            Grid.SetColumn(label, column);
-
-            return label;
+                return label;
+            }
         }
     }
 }

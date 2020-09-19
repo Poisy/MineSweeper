@@ -97,7 +97,49 @@
                 <Setter Property="HorizontalOptions" Value="Center"/>
                 <Setter Property="Margin" Value="0, 0, 0, 20"/>
             </Style>
-            
+
+            <Style x:Key="GameOverOutsideFrameStyle" TargetType="Frame">
+                <Setter Property="CornerRadius" Value="15"/>
+                <Setter Property="Margin" Value="15, 15, 15, 250"/>
+                <Setter Property="Padding" Value="1, 1, 6, 9"/>
+                <Setter Property="HeightRequest" Value="250"/>
+                <Setter Property="WidthRequest" Value="400"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="HorizontalOptions" Value="Center"/>
+                <Setter Property="Grid.Column" Value="0"/>
+                <Setter Property="Grid.Row" Value="1"/>
+                <Setter Property="Grid.ColumnSpan" Value="3"/>
+                <Setter Property="BackgroundColor" Value="#55ffffff"/>
+                <Setter Property="HasShadow" Value="False"/>
+            </Style>
+
+            <Style x:Key="GameOverInsideFrameStyle" TargetType="Frame">
+                <Setter Property="CornerRadius" Value="15"/>
+                <Setter Property="HeightRequest" Value="250"/>
+                <Setter Property="WidthRequest" Value="400"/>
+                <Setter Property="BackgroundColor" Value="#ccff619e"/>
+                <Setter Property="VerticalOptions" Value="Center"/>
+                <Setter Property="HorizontalOptions" Value="Center"/>
+                <Setter Property="HasShadow" Value="False"/>
+            </Style>
+
+            <Style x:Key="NewGameImageButtonStyle" TargetType="ImageButton">
+                <Setter Property="BackgroundColor" Value="Transparent"/>
+                <Setter Property="ScaleX" Value="0"/>
+                <Style.Triggers>
+                    <Trigger TargetType="ImageButton" Property="IsPressed" Value="True">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="RecordsListViewStyle" TargetType="ListView">
+                <Setter Property="Grid.Row" Value="1"/>
+                <Setter Property="Margin" Value="5, 0, 5, 5"/>
+                <Setter Property="SeparatorColor" Value="Pink"/>
+                <Setter Property="VerticalScrollBarVisibility" Value="Never"/>
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

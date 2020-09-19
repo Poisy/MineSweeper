@@ -36,7 +36,7 @@
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
             <Image x:Name="_timerImage" Grid.ColumnSpan="3" Grid.RowSpan="3" Style="{StaticResource TimerImageStyle}"/>
-            <Label x:Name="_timer" Grid.Row="1" Grid.Column="1" HorizontalTextAlignment="Start"/>
+            <Label x:Name="_timer" Grid.Row="1" Grid.Column="1" HorizontalTextAlignment="Start" Text="00:00"/>
         </Grid>
 
         <!--Settings Image-->

@@ -8,6 +8,29 @@
              Title="Your Records">
     <Grid>
         <Image Style="{StaticResource BackgroundImageStyle}"/>
-        <ListView x:Name="_recordsListView" SelectionMode="None"/>
+        <Frame BackgroundColor="#88000000" CornerRadius="15" Margin="15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="20*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Margin="5, 5, 5, 0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Text="Time" Grid.Column="0" FontSize="20" VerticalTextAlignment="End"  TextColor="White"/>
+                    <Label Text="Mines" Grid.Column="1" FontSize="20" VerticalTextAlignment="End" TextColor="White"/>
+                    <Label Text="Size" Grid.Column="2" FontSize="20" VerticalTextAlignment="End" TextColor="White"/>
+                    <Label Text="Date" Grid.Column="3" FontSize="20" VerticalTextAlignment="End" TextColor="White"/>
+                </Grid>
+
+                <ListView x:Name="_recordsListView" SelectionMode="None" Style="{StaticResource RecordsListViewStyle}"/>
+            </Grid>
+        </Frame>
     </Grid>
+
 </ContentPage>

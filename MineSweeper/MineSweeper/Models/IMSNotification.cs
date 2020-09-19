@@ -2,6 +2,6 @@
 {
     public interface IMSNotification
     {
-        void NotifyGameOver(Cell cell);
+        void NotifyGameOver(Cell cell, int wrongMines);
     }
 }

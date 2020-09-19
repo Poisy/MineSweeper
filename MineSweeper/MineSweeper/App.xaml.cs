@@ -1,4 +1,5 @@
-﻿using Xamarin.Forms;
+﻿using MineSweeper.Models;
+using Xamarin.Forms;
 
 namespace MineSweeper
 {
@@ -7,6 +8,8 @@ namespace MineSweeper
         public App()
         {
             InitializeComponent();
+
+            RecordsDatabase.GetInstance();
 
             NavigationPage navigation = new NavigationPage();
             navigation.PushAsync(new MainPage(), true);

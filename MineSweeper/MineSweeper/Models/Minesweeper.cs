@@ -38,11 +38,6 @@ namespace MineSweeper.Models
         }
 
         /// <summary>
-        /// Contains methods from the class who initialize this object
-        /// </summary>
-        private IMSNotification Notification { get; set; }
-
-        /// <summary>
         /// This is used for preventing cells to be clicked
         /// </summary>
         private Point invalidCoordinates = new Point();
@@ -53,16 +48,43 @@ namespace MineSweeper.Models
 
 
         #region Constructor
-        public Minesweeper(IMSSettings settings, IMSNotification notification)
+        public Minesweeper(IMSSettings settings)
         {
             Settings = settings;
-            Notification = notification;
             MinesLeft = Settings.CountMines;
 
             LoadDefaultTheme();
 
             BindingContext = Settings;
         }
+        #endregion
+
+
+
+        #region Events
+
+        /// <summary>
+        /// The event is raisen when the game is over because of one of the followings:
+        /// <br/>- wrong cell was clicked;
+        /// <br/>- all mine cells are flagged and there are no flagged free cells.
+        /// </summary>
+        public event EventHandler<GameOverArgs> GameOver;
+
+        /// <summary>
+        /// The event is raised when any <see cref="Cell"/> is clicked
+        /// </summary>
+        public event EventHandler<CellClickedArgs> CellClicked;
+
+        /// <summary>
+        /// The event is raised when any <see cref="Cell"/> is pressed and holded
+        /// </summary>
+        public event EventHandler CellHolded;
+
+
+        private void OnGameOver(GameOverArgs e) => GameOver?.Invoke(this, e);
+        private void OnCellClicked(CellClickedArgs e) => CellClicked?.Invoke(this, e);
+        private void OnCellHolded(EventArgs e) => CellHolded?.Invoke(this, e);
+
         #endregion
 
 
@@ -133,6 +155,9 @@ namespace MineSweeper.Models
         }
 
 
+        /// <summary>
+        /// Creates <see cref="Cell"/>'s of the Mine
+        /// </summary>
         private void CreateMines()
         {
             Random rnd = new Random();
@@ -206,10 +231,16 @@ namespace MineSweeper.Models
             int x = cell.Row; 
             int y = cell.Column;
 
-            if (invalidCoordinates.X == x && invalidCoordinates.Y == y) return;
+            if (invalidCoordinates.X == x && invalidCoordinates.Y == y)
+            {
+                invalidCoordinates = new Point(-1, -1);
+                return;
+            }
 
             if (!cell.Show(ViewsToCells(Children), Settings.Rows, Settings.Columns))
             {
+                int wrongMines = 0;
+
                 for (int i = 0; i < Settings.Rows; i++)
                 {
                     for (int j = 0; j < Settings.Columns; j++)
@@ -226,13 +257,14 @@ namespace MineSweeper.Models
                         {
                             temp.SetSource(Settings.WrongMineSource);
                             temp.Unhide();
+                            wrongMines++;
                         }
 
                     }
                 }
 
                 IsGameOver = true;
-                Notification.NotifyGameOver(cell);
+                OnGameOver(new GameOverArgs { WrongMines = wrongMines, IsVictory = false });
                 cell.BackgroundColor = Color.Red;
             }
             else
@@ -257,6 +289,16 @@ namespace MineSweeper.Models
                             }
                         }
                     }
+                }
+            }
+
+            OnCellClicked(new CellClickedArgs { IsGameOver = IsGameOver });
+
+            if (MinesLeft == 0)
+            {
+                if (DidWin())
+                {
+                    OnGameOver(new GameOverArgs { IsVictory = true, WrongMines = 0 });
                 }
             }
         }
@@ -287,7 +329,17 @@ namespace MineSweeper.Models
                 cell.SetSource(Settings.FlagSource);
                 cell.IsFlaged = true;
                 MinesLeft--;
+
+                if (MinesLeft == 0)
+                {
+                    if (DidWin())
+                    {
+                        OnGameOver(new GameOverArgs { IsVictory = true, WrongMines = 0 });
+                    }
+                }
             }
+
+            OnCellHolded(new EventArgs());
 
             await Task.Run(() =>
             {
@@ -295,6 +347,27 @@ namespace MineSweeper.Models
 
                 invalidCoordinates = new Point(x, y);
             });
+        }
+
+
+        /// <summary>
+        /// Checks if all conditions for victory are achieved
+        /// </summary>
+        private bool DidWin()
+        {
+            foreach (Cell cell in ViewsToCells(Children))
+            {
+                if (cell.IsMine)
+                {
+                    if (!cell.IsFlaged) return false;
+                }
+                else
+                {
+                    if (!cell.Visibility) return false;
+                }
+            }
+
+            return true;
         }
 
 
@@ -337,6 +410,23 @@ namespace MineSweeper.Models
             return views.Cast<Cell>().ToList();
         }
 
+
+        #endregion
+
+
+
+        #region Classes
+
+        public class GameOverArgs : EventArgs
+        {
+            public int WrongMines { get; set; }
+            public bool IsVictory { get; set; }
+        }
+
+        public class CellClickedArgs : EventArgs
+        {
+            public bool IsGameOver { get; set; }
+        }
 
         #endregion
     }

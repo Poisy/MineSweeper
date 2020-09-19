@@ -71,6 +71,7 @@ namespace MineSweeper.Models
         public void Unhide()
         {
             SetBinding(ImageButton.BackgroundColorProperty, new Binding("Background"));
+            //Visibility = true;
         }
 
 
