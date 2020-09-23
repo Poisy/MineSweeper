@@ -393,10 +393,10 @@ namespace MineSweeper.Models
         {
             Cell cell = Children[row * Settings.Columns + col] as Cell;
 
-            if (cell == null)
-            {
-                throw new Exception("There can't be view in the Minesweeper which isn't Cell");
-            }
+            //if (cell == null)
+            //{
+            //    throw new Exception("There can't be view in the Minesweeper which isn't Cell");
+            //}
 
             return cell;
         }
